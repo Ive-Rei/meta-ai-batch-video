@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meta AI Prompt Automator</title>
+  <style>
+    :root {
+      --bg: #0e1116;
+      --bg-elevated: #161b22;
+      --bg-hover: #1c2330;
+      --border: #232b38;
+      --border-strong: #303a4a;
+      --text: #e6edf3;
+      --text-muted: #8b98a9;
+      --text-dim: #5c6a7d;
+      --accent: #4c8dff;
+      --accent-hover: #6ba1ff;
+      --accent-soft: rgba(76, 141, 255, 0.12);
+      --green: #3fb950;
+      --green-soft: rgba(63, 185, 80, 0.14);
+      --amber: #d29922;
+      --amber-soft: rgba(210, 153, 34, 0.14);
+      --gray-soft: rgba(139, 152, 169, 0.12);
+      --radius: 10px;
+      --radius-sm: 7px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---------- Header ---------- */
+    header {
+      padding: 16px 16px 14px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #131924 0%, var(--bg) 100%);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .brand-mark {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #4c8dff 0%, #8b5cf6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .brand h1 {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .brand .sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 1px;
+    }
+
+    /* ---------- Toolbar ---------- */
+    .toolbar {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-elevated);
+      color: var(--text);
+      padding: 8px 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+      width: 100%;
+      user-select: none;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bg-hover);
+      border-color: #3d4a5e;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    .file-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-dim);
+      min-height: 16px;
+    }
+
+    .file-meta .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+
+    .file-meta .count {
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+
+    .toolbar-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toolbar-row .btn {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .btn-accent {
+      background: var(--accent-soft);
+      border-color: rgba(76, 141, 255, 0.45);
+      color: var(--accent-hover);
+      font-weight: 600;
+    }
+
+    .btn-accent:hover:not(:disabled) {
+      background: rgba(76, 141, 255, 0.22);
+      border-color: var(--accent);
+    }
+
+    .btn-danger {
+      background: rgba(248, 81, 73, 0.12);
+      border-color: rgba(248, 81, 73, 0.4);
+      color: #ff7b72;
+      font-weight: 600;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(248, 81, 73, 0.22);
+      border-color: #f85149;
+    }
+
+    /* ---------- Auto run panel ---------- */
+    [hidden] {
+      display: none !important;
+    }
+
+    .auto-panel {
+      padding: 11px 12px;
+      border: 1px solid rgba(76, 141, 255, 0.35);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(76, 141, 255, 0.1) 0%, var(--bg-elevated) 100%);
+      margin: 12px 16px 0;
+      flex-shrink: 0;
+      animation: auto-in 0.18s ease;
+    }
+
+    @keyframes auto-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auto-head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 8px;
+    }
+
+    .auto-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.82); }
+    }
+
+    .auto-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--accent-hover);
+    }
+
+    .auto-progress {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    .auto-body {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .auto-timer {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+      flex-shrink: 0;
+      min-width: 62px;
+    }
+
+    .auto-timer.counting {
+      color: var(--accent-hover);
+    }
+
+    .auto-body .btn {
+      width: auto;
+      flex: 0 0 auto;
+      margin-left: auto;
+      padding: 6px 18px;
+    }
+
+    .auto-bar {
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(139, 152, 169, 0.18);
+      overflow: hidden;
+      margin-top: 9px;
+    }
+
+    .auto-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent) 0%, #8b5cf6 100%);
+      transition: width 0.9s linear;
+    }
+
+    /* ---------- Shot list ---------- */
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 8px;
+      flex-shrink: 0;
+    }
+
+    .list-header h2 {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+    }
+
+    #progress {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    #shotList {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #shotList::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #shotList::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #shotList::-webkit-scrollbar-thumb {
+      background: #2b3444;
+      border-radius: 4px;
+    }
+
+    #shotList::-webkit-scrollbar-thumb:hover {
+      background: #3a4558;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-dim);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius);
+      margin-top: 4px;
+    }
+
+    .empty-state svg {
+      width: 30px;
+      height: 30px;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      font-size: 12px;
+      line-height: 1.6;
+      max-width: 220px;
+    }
+
+    /* ---------- Shot card ---------- */
+    .shot-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 11px;
+      transition: border-color 0.14s ease, background 0.14s ease;
+    }
+
+    .shot-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .shot-card.active {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg-elevated) 100%);
+    }
+
+    .shot-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
+
+    .shot-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--gray-soft);
+      border-radius: 5px;
+      padding: 1px 7px;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .shot-card.active .shot-id {
+      background: var(--accent-soft);
+      color: var(--accent-hover);
+    }
+
+    .badge {
+      margin-left: auto;
+      font-family: inherit;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      padding: 2px 8px;
+      border: none;
+      border-radius: 999px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: filter 0.14s ease;
+    }
+
+    .badge:hover:not(:disabled) {
+      filter: brightness(1.25);
+    }
+
+    .badge:disabled {
+      cursor: default;
+    }
+
+    .badge.pending {
+      background: var(--gray-soft);
+      color: var(--text-muted);
+    }
+
+    .badge.sent {
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .badge.done {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .shot-prompt {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 9px;
+      word-break: break-word;
+    }
+
+    .shot-overlay {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 9px;
+      padding-left: 8px;
+      border-left: 2px solid var(--border-strong);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .shot-overlay .lbl {
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    .shot-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-sm {
+      flex: 1;
+      font-size: 11.5px;
+      padding: 6px 8px;
+      font-weight: 500;
+    }
+
+    .btn-send {
+      background: var(--accent-soft);
+      border-color: transparent;
+      color: var(--accent-hover);
+    }
+
+    .btn-send:hover:not(:disabled) {
+      background: rgba(76, 141, 255, 0.22);
+      border-color: transparent;
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-elevated);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .status-line {
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 15px;
+    }
+
+    .status-line .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .status-line.ok .dot { background: var(--green); }
+    .status-line.err .dot { background: #f85149; }
+    .status-line.busy .dot { background: var(--amber); }
+
+    .status-line span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-mark">M</div>
+      <div>
+        <h1>Prompt Automator</h1>
+        <div class="sub">meta.ai shot runner</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="toolbar-row">
+      <button class="btn" id="loadBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        Load JSON File
+      </button>
+      <button class="btn btn-accent" id="autoBtn" type="button" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+          <path d="M8 5.14v13.72c0 .8.87 1.3 1.56.9l11.02-6.86a1.05 1.05 0 0 0 0-1.8L9.56 4.24A1.05 1.05 0 0 0 8 5.14z" />
+        </svg>
+        Auto Run All
+      </button>
+    </div>
+    <input type="file" id="fileInput" accept=".json,application/json" hidden />
+
+    <div class="file-meta">
+      <span class="name" id="fileName">No file loaded</span>
+      <span class="count" id="fileCount"></span>
+    </div>
+  </div>
+
+  <div class="auto-panel" id="autoPanel" hidden>
+    <div class="auto-head">
+      <span class="auto-dot"></span>
+      <span class="auto-label" id="autoLabel">Auto run</span>
+      <span class="auto-progress" id="autoProgress"></span>
+    </div>
+    <div class="auto-body">
+      <div class="auto-timer" id="autoTimer">--:--</div>
+      <button class="btn btn-danger btn-sm" id="stopBtn" type="button">Stop</button>
+    </div>
+    <div class="auto-bar">
+      <div class="auto-bar-fill" id="autoFill"></div>
+    </div>
+  </div>
+
+  <div class="list-header">
+    <h2>Shots</h2>
+    <span id="progress"></span>
+  </div>
+
+  <div id="shotList">
+    <div class="empty-state" id="emptyState">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="9" y1="13" x2="15" y2="13" />
+        <line x1="9" y1="17" x2="13" y2="17" />
+      </svg>
+      <p>Load a JSON file to get started.<br />Each shot needs a prompt.</p>
+    </div>
+  </div>
+
+  <footer>
+    <button class="btn btn-primary" id="downloadBtn" type="button" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+      Download Latest Video
+    </button>
+    <div class="status-line" id="statusLine">
+      <span class="dot"></span>
+      <span id="statusText">Ready</span>
+    </div>
+  </footer>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

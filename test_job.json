@@ -1,0 +1,14 @@
+{
+  "shots": [
+    {
+      "shot_id": 1,
+      "prompt": "Modern Thai condominium bedroom in Bangkok, warm tropical morning sunlight, sheer curtains, photorealistic 4k, close-up shot of a flat sagging white pillow on a Thai-style wooden bed, slow camera push in, vertical 9:16, silent video, no speech, no text, no watermark",
+      "overlay": "ตื่นมาปวดคอเพราะหมอนยุบ?"
+    },
+    {
+      "shot_id": 2,
+      "prompt": "Modern Thai condominium bedroom in Bangkok, warm tropical morning sunlight, photorealistic 4k, sleek white ergonomic contoured memory foam pillow resting neatly on grey linen sheets, smooth orbiting camera motion, vertical 9:16, silent video, no speech, no text, no watermark",
+      "overlay": "หมอนสุขภาพทรงญี่ปุ่น"
+    }
+  ]
+}

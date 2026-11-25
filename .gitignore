@@ -1,0 +1,13 @@
+# Generated / downloaded media
+*.mp4
+shot_*.mp4
+
+# Local test scaffolding (names starting with "_" also break Chrome extension loading)
+_*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/

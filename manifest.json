@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Meta AI Prompt Automator",
+  "version": "1.0.0",
+  "description": "Automate shot prompts and download generated videos on meta.ai",
+  "permissions": [
+    "sidePanel",
+    "activeTab",
+    "scripting",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://www.meta.ai/*"
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "Meta AI Prompt Automator"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.meta.ai/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ]
+}
